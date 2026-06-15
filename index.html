@@ -2,233 +2,91 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Магазин</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
-        .header { background: #1a1a2e; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .cart-btn { background: #e94560; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; }
-        .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; padding: 20px; max-width: 1200px; margin: 0 auto; }
-        .product-card { background: white; border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .product-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; }
-        .product-card h3 { margin: 10px 0; font-size: 16px; }
-        .product-card .price { font-size: 20px; font-weight: bold; color: #e94560; margin: 10px 0; }
-        .product-card button { width: 100%; padding: 10px; background: #0f3460; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 5px; font-size: 14px; }
-        .product-card .buy-one { background: #ffa502; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; }
-        .modal-content h2 { margin-bottom: 15px; }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
-        .cart-total { text-align: right; font-size: 20px; font-weight: bold; padding: 15px 0; }
-        .modal input, .modal select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        .modal button { width: 100%; padding: 14px; background: #2ed573; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 10px; font-weight: bold; }
-        .modal button:hover { opacity: 0.9; }
-        .close { position: absolute; right: 15px; top: 10px; font-size: 28px; cursor: pointer; background: none; border: none; }
-        .warning { background: #fff3cd; border: 2px solid #ffc107; border-radius: 10px; padding: 15px; margin: 10px 0; text-align: center; }
-        .warning h3 { color: #856404; margin-bottom: 8px; }
-        .warning p { margin: 5px 0; color: #856404; }
-        .remove-btn { background: #ff4757 !important; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; width: auto !important; }
+        body { font-family: Arial; background: #f5f5f5; margin: 0; }
+        .header { background: #1a1a2e; color: white; padding: 15px 30px; }
+        .products { display: flex; flex-wrap: wrap; gap: 15px; padding: 20px; max-width: 1000px; margin: 0 auto; }
+        .card { background: white; border-radius: 10px; padding: 15px; width: 220px; }
+        .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
+        .card h3 { margin: 8px 0; font-size: 16px; }
+        .card .price { font-size: 18px; font-weight: bold; color: #e94560; }
+        .card button { width: 100%; padding: 10px; margin-top: 5px; background: #0f3460; color: white; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>🛒 Магазин</h1>
-    <button class="cart-btn" onclick="openCart()">🛒 Корзина <span id="count">0</span></button>
+    <h1>Магазин</h1>
 </div>
 
 <div class="products" id="products"></div>
 
-<div class="modal" id="cartModal">
-    <div class="modal-content">
-        <button class="close" onclick="closeCart()">✖</button>
-        <h2>🛒 Корзина</h2>
-        <div id="cartItems"></div>
-        <div class="cart-total">Итого: <span id="total">0</span> ₽</div>
-        
-        <div id="orderForm">
-            <select id="contactType">
-                <option value="telegram">Telegram</option>
-                <option value="vk">ВКонтакте</option>
-            </select>
-            <input type="text" id="contactName" placeholder="@username или ссылка">
-            <input type="text" id="customerName" placeholder="Ваше имя">
-            
-            <div class="warning">
-                <h3>⚠️ ВНИМАНИЕ!</h3>
-                <p>Я свяжусь с вами для уточнения деталей</p>
-                <p>и отправлю реквизиты для оплаты</p>
-            </div>
-            
-            <button onclick="checkout()">✅ Оформить заказ</button>
-        </div>
-    </div>
-</div>
-
-<div class="modal" id="buyModal">
-    <div class="modal-content" id="buyContent"></div>
-</div>
 <script>
-    // ТОВАРЫ ПРЯМО ЗДЕСЬ - МЕНЯЙ КАК ХОЧЕШЬ
-    const products = [
-        { id: 1, name: '2D Логотип', price: 230, image: 'https://postimg.cc/xXFTsgm7', description: '2D логотип в стиле Текст, слоган, лого.' },
-        { id: 2, name: 'Samsung S24', price: 79990, image: 'https://picsum.photos/300/300?random=2', description: 'Samsung Galaxy S24 256GB' },
-        { id: 3, name: 'AirPods Pro', price: 19990, image: 'https://picsum.photos/300/300?random=3', description: 'Apple AirPods Pro 2' },
-        { id: 4, name: 'MacBook Air', price: 109990, image: 'https://picsum.photos/300/300?random=4', description: 'MacBook Air M3 13"' },
-        { id: 5, name: 'Xiaomi 14', price: 49990, image: 'https://picsum.photos/300/300?random=5', description: 'Xiaomi 14 512GB' },
-        { id: 6, name: 'Sony WH-1000XM5', price: 29990, image: 'https://picsum.photos/300/300?random=6', description: 'Наушники Sony' },
-        { id: 7, name: 'iPad Air', price: 59990, image: 'https://picsum.photos/300/300?random=7', description: 'iPad Air M2 11"' },
-        { id: 8, name: 'Apple Watch', price: 39990, image: 'https://picsum.photos/300/300?random=8', description: 'Apple Watch Series 9' }
-    ];
+const URL = 'https://fetnrmzltbpgatcgelca.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZldG5ybXpsdGJwZ2F0Y2dlbGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU5NjQsImV4cCI6MjA5NTY1MTk2NH0.l-3iGMBY1mRnpGxNjZN981i360k4fgYsgyEkwBK1jqU';
 
-    const URL = 'https://fetnrmzltbpgatcgelca.supabase.co';
-    const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZldG5ybXpsdGJwZ2F0Y2dlbGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU5NjQsImV4cCI6MjA5NTY1MTk2NH0.l-3iGMBY1mRnpGxNjZN981i360k4fgYsgyEkwBK1jqU';
+const products = [
+    { id:1, name:'iPhone 15', price:89990, image:'https://picsum.photos/300/300?1', desc:'128GB' },
+    { id:2, name:'Samsung S24', price:79990, image:'https://picsum.photos/300/300?2', desc:'256GB' },
+    { id:3, name:'AirPods Pro', price:19990, image:'https://picsum.photos/300/300?3', desc:'2 gen' },
+    { id:4, name:'MacBook Air', price:109990, image:'https://picsum.photos/300/300?4', desc:'M3' }
+];
+
+document.getElementById('products').innerHTML = products.map(p => `
+    <div class="card">
+        <img src="${p.image}" alt="${p.name}">
+        <h3>${p.name}</h3>
+        <p>${p.desc}</p>
+        <div class="price">${p.price.toLocaleString()} ₽</div>
+        <button onclick="buy(${p.id})">Купить</button>
+    </div>
+`).join('');
+
+async function buy(id) {
+    const name = prompt('Ваше имя:');
+    if (!name) return;
+    const contact = prompt('Telegram или VK (@username):');
+    if (!contact) return;
     
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-    function showProducts() {
-        document.getElementById('products').innerHTML = products.map(p => `
-            <div class="product-card">
-                <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/300'">
-                <h3>${p.name}</h3>
-                <p>${p.description}</p>
-                <div class="price">${p.price.toLocaleString()} ₽</div>
-                <button onclick="addToCart(${p.id})">🛒 В корзину</button>
-                <button class="buy-one" onclick="buyOne(${p.id})">⚡ Купить сейчас</button>
-            </div>
-        `).join('');
-    }
-
-    function addToCart(id) {
-        const p = products.find(x => x.id === id);
-        const item = cart.find(x => x.id === id);
-        item ? item.qty++ : cart.push({id: p.id, name: p.name, price: p.price, qty: 1});
-        save();
-        alert('✅ Добавлено!');
-    }
-
-    function save() {
-        localStorage.setItem('cart', JSON.stringify(cart));
-        document.getElementById('count').textContent = cart.reduce((s, i) => s + i.qty, 0);
-    }
-
-    function openCart() { document.getElementById('cartModal').classList.add('active'); showCart(); }
-    function closeCart() { document.getElementById('cartModal').classList.remove('active'); }
-
-    function showCart() {
-        const div = document.getElementById('cartItems');
-        if (cart.length === 0) {
-            div.innerHTML = '<p style="text-align:center;padding:20px;">Корзина пуста</p>';
-            document.getElementById('total').textContent = '0';
-            document.getElementById('orderForm').style.display = 'none';
-            return;
-        }
-        document.getElementById('orderForm').style.display = 'block';
-        let total = 0;
-        div.innerHTML = cart.map((item, i) => {
-            total += item.price * item.qty;
-            return `<div class="cart-item">
-                <span>${item.name} × ${item.qty}</span>
-                <span>${(item.price * item.qty).toLocaleString()} ₽</span>
-                <button class="remove-btn" onclick="remove(${i})">✖</button>
-            </div>`;
-        }).join('');
-        document.getElementById('total').textContent = total.toLocaleString();
-    }
-
-    function remove(i) { cart.splice(i, 1); save(); showCart(); }
-
-    function buyOne(id) {
-        const p = products.find(x => x.id === id);
-        document.getElementById('buyModal').classList.add('active');
-        document.getElementById('buyContent').innerHTML = `
-            <button class="close" onclick="document.getElementById('buyModal').classList.remove('active')">✖</button>
-            <h2>⚡ ${p.name}</h2>
-            <p style="font-size:22px;color:#e94560;font-weight:bold;">${p.price.toLocaleString()} ₽</p>
-            <select id="bcontactType"><option value="telegram">Telegram</option><option value="vk">ВКонтакте</option></select>
-            <input type="text" id="bcontactName" placeholder="@username или ссылка">
-            <input type="text" id="bname" placeholder="Ваше имя">
-            <div class="warning"><h3>⚠️ ВНИМАНИЕ!</h3><p>Я свяжусь с вами для уточнения деталей</p><p>и отправлю реквизиты для оплаты</p></div>
-            <button onclick="orderOne(${id})">✅ Оформить заказ</button>
-        `;
-    }
-
-    async function orderOne(id) {
-        const type = document.getElementById('bcontactType').value;
-        const contact = document.getElementById('bcontactName').value.trim();
-        const name = document.getElementById('bname').value.trim();
-        if (!contact || !name) return alert('Заполни все поля!');
-        const p = products.find(x => x.id === id);
-        await sendOrder(name, type + ': ' + contact, [{name: p.name, price: p.price, qty: 1}], p.price);
-        document.getElementById('buyModal').classList.remove('active');
-    }
-
-    async function checkout() {
-        const type = document.getElementById('contactType').value;
-        const contact = document.getElementById('contactName').value.trim();
-        const name = document.getElementById('customerName').value.trim();
-        if (!contact || !name) return alert('Заполни все поля!');
-        if (cart.length === 0) return alert('Корзина пуста!');
-        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-        await sendOrder(name, type + ': ' + contact, cart, total);
-        cart = [];
-        save();
-        closeCart();
-    }
-
-    async function sendOrder(name, contact, items, total) {
-        const order = {
-            customer_name: name,
-            customer_phone: contact,
-            customer_address: '',
-            items: JSON.stringify(items),
-            total: total,
-            status: 'новый'
-        };
-
-        const res = await fetch(`${URL}/rest/v1/orders`, {
-            method: 'POST',
-            headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify(order)
-        });
-
-        if (res.ok) {
-            await notifyTelegram(order);
-            alert('✅ Заказ оформлен! Я свяжусь с вами.');
-        }
-    }
-
-    async function notifyTelegram(order) {
+    const p = products.find(x => x.id === id);
+    
+    const order = {
+        customer_name: name,
+        customer_phone: contact,
+        items: JSON.stringify([{name:p.name, price:p.price, qty:1}]),
+        total: p.price
+    };
+    
+    const res = await fetch(URL + '/rest/v1/orders', {
+        method: 'POST',
+        headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+    });
+    
+    if (res.ok) {
+        // Отправка в Telegram
         try {
-            const res = await fetch(`${URL}/rest/v1/settings?select=*`, {
-                headers: { 'apikey': KEY }
-            });
-            const settings = await res.json();
-            if (!settings.length) return;
-
-            const { bot_token, chat_id } = settings[0];
-            const items = JSON.parse(order.items);
-            let text = '🛒 *НОВЫЙ ЗАКАЗ!*\n\n';
-            text += '👤 ' + order.customer_name + '\n';
-            text += '📱 ' + order.customer_phone + '\n\n📦 Товары:\n';
-            items.forEach(i => text += '— ' + i.name + ' × ' + i.qty + ' = ' + (i.price*i.qty).toLocaleString() + ' ₽\n');
-            text += '\n💰 *' + order.total.toLocaleString() + ' ₽*';
-
-            await fetch(`https://api.telegram.org/bot${bot_token}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id, text, parse_mode: 'Markdown' })
-            });
+            const s = await fetch(URL + '/rest/v1/settings?select=*', { headers: {'apikey': KEY} });
+            const settings = await s.json();
+            if (settings.length > 0) {
+                const {bot_token, chat_id} = settings[0];
+                await fetch(`https://api.telegram.org/bot${bot_token}/sendMessage`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        chat_id: chat_id,
+                        text: `🛒 Заказ!\n👤 ${name}\n📱 ${contact}\n📦 ${p.name}\n💰 ${p.price} ₽`
+                    })
+                });
+            }
         } catch(e) {}
+        alert('✅ Заказ оформлен!');
+    } else {
+        const err = await res.text();
+        alert('Ошибка: ' + err);
     }
-
-    document.getElementById('cartModal').addEventListener('click', function(e) { if (e.target === this) closeCart(); });
-    document.getElementById('buyModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
-
-    showProducts();
-    save();
+}
 </script>
 
 </body>
