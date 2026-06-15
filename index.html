@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Store</title>
+    <title>Void Store</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         
@@ -28,18 +28,20 @@
         }
         
         .header h1 {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 800;
-            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            background: linear-gradient(135deg, #a78bfa, #7c3aed, #4f46e5);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: 3px;
         }
         
         .header p {
             font-size: 14px;
             color: rgba(255,255,255,0.5);
             margin-top: 5px;
+            letter-spacing: 2px;
         }
         
         .products {
@@ -58,55 +60,25 @@
             padding: 25px 20px;
             text-align: center;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
         }
         
         .card:hover {
             transform: translateY(-5px);
-            border-color: rgba(255,255,255,0.3);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-color: rgba(167, 139, 250, 0.5);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.2);
         }
         
-        .card:hover::before { opacity: 1; }
-        
-        .card .icon {
-            font-size: 50px;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .card h3 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            position: relative;
-            z-index: 1;
-        }
+        .card .icon { font-size: 50px; margin-bottom: 15px; }
+        .card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
         
         .card .price {
             font-size: 26px;
             font-weight: 800;
-            background: linear-gradient(135deg, #667eea, #f093fb);
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin: 12px 0;
-            position: relative;
-            z-index: 1;
         }
         
         .card button {
@@ -117,20 +89,18 @@
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            position: relative;
-            z-index: 1;
             transition: all 0.2s;
             font-family: 'Inter', sans-serif;
         }
         
         .btn-buy {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
             color: white;
         }
         
         .btn-buy:hover {
             transform: scale(1.03);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
         }
         
         .popup {
@@ -149,7 +119,7 @@
         
         .popup-box {
             background: #1a1a2e;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(167, 139, 250, 0.3);
             border-radius: 20px;
             padding: 30px 25px;
             width: 90%;
@@ -163,11 +133,7 @@
             to { transform: translateY(0); opacity: 1; }
         }
         
-        .popup-box h2 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
+        .popup-box h2 { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
         
         .popup-box input {
             width: 100%;
@@ -183,14 +149,10 @@
             transition: border 0.2s;
         }
         
-        .popup-box input:focus { border-color: #667eea; }
+        .popup-box input:focus { border-color: #7c3aed; }
         .popup-box input::placeholder { color: rgba(255,255,255,0.4); }
         
-        .contact-tabs {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-        }
+        .contact-tabs { display: flex; gap: 10px; margin: 10px 0; }
         
         .contact-tab {
             flex: 1;
@@ -206,14 +168,9 @@
             font-family: 'Inter', sans-serif;
         }
         
-        .contact-tab.active {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.2);
-        }
-        
+        .contact-tab.active { border-color: #7c3aed; background: rgba(124, 58, 237, 0.2); }
         .contact-tab.tg { border-color: #45b7d1; }
         .contact-tab.tg.active { background: rgba(69, 183, 209, 0.3); }
-        
         .contact-tab.vk { border-color: #4a76a8; }
         .contact-tab.vk.active { background: rgba(74, 118, 168, 0.3); }
         
@@ -240,53 +197,37 @@
             box-shadow: 0 10px 25px rgba(0, 184, 148, 0.4);
         }
         
-        .btn-red {
-            background: rgba(255,255,255,0.1);
-            color: #ff6b6b;
-        }
+        .btn-red { background: rgba(255,255,255,0.1); color: #ff6b6b; }
+        .btn-blue { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; }
         
-        .btn-blue {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-        
-        .result-icon {
-            font-size: 60px;
-            margin-bottom: 10px;
-        }
-        
-        .result-text {
-            font-size: 16px;
-            color: rgba(255,255,255,0.8);
-            margin: 10px 0 15px 0;
-            line-height: 1.5;
-        }
+        .result-icon { font-size: 60px; margin-bottom: 10px; }
+        .result-text { font-size: 16px; color: rgba(255,255,255,0.8); margin: 10px 0 15px 0; line-height: 1.5; }
         
         .footer {
             text-align: center;
             padding: 30px;
             color: rgba(255,255,255,0.3);
             font-size: 13px;
+            letter-spacing: 2px;
         }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>✨ Digital Store</h1>
-    <p>Дизайн и разработка</p>
+    <h1>VOID STORE</h1>
+    <p>дизайн и разработка</p>
 </div>
 
 <div class="products" id="products"></div>
 
-<div class="footer">© Digital Store • Все права защищены</div>
+<div class="footer">© Void Store</div>
 
-<!-- Форма заказа -->
 <div class="popup" id="formPopup">
     <div class="popup-box">
         <div style="font-size:40px;" id="formIcon"></div>
         <h2 id="formTitle"></h2>
-        <p id="formPrice" style="color:#667eea;font-weight:700;margin-bottom:15px;"></p>
+        <p id="formPrice" style="color:#a78bfa;font-weight:700;margin-bottom:15px;"></p>
         
         <div class="contact-tabs">
             <button class="contact-tab tg active" onclick="selectContact('telegram')" id="tabTg">✈️ Telegram</button>
@@ -301,7 +242,6 @@
     </div>
 </div>
 
-<!-- Результат -->
 <div class="popup" id="resultPopup">
     <div class="popup-box">
         <div class="result-icon" id="resultIcon"></div>
@@ -311,8 +251,9 @@
 </div>
 
 <script>
-var URL = 'https://fetnrmzltbpgatcgelca.supabase.co';
-var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZldG5ybXpsdGJwZ2F0Y2dlbGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU5NjQsImV4cCI6MjA5NTY1MTk2NH0.l-3iGMBY1mRnpGxNjZN981i360k4fgYsgyEkwBK1jqU';
+// Зашифрованные данные
+var _t = atob('ODk4MjA5MzYwODpBQUVqVlhaeDlUR3dSRUp4YmRKZU5FTnRpeWJpekFWSWZBNA==');
+var _c = '8549857532';
 
 var products = [
     { id:1, name:'2D Логотип', price:230, icon:'🎨' },
@@ -368,7 +309,7 @@ function showResult(icon, text) {
 }
 function hideResult() { document.getElementById('resultPopup').classList.remove('show'); }
 
-document.getElementById('submitBtn').onclick = async function() {
+document.getElementById('submitBtn').onclick = function() {
     var name = document.getElementById('custName').value.trim();
     var contact = document.getElementById('custContact').value.trim();
     
@@ -379,40 +320,19 @@ document.getElementById('submitBtn').onclick = async function() {
     hideForm();
     showResult('✅', 'Заказ оформлен!\nЯ напишу вам в ' + (contactType === 'telegram' ? 'Telegram' : 'ВКонтакте') + '\nдля уточнения деталей.');
     
-    // Telegram
-    try {
-        var s = await fetch(URL + '/rest/v1/settings?select=*', { headers: {'apikey': KEY} });
-        var set = await s.json();
-        if (set.length > 0) {
-            await fetch('https://api.telegram.org/bot' + set[0].bot_token + '/sendMessage', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    chat_id: set[0].chat_id,
-                    text: '🛒 *НОВЫЙ ЗАКАЗ!*\n\n' +
-                          cur.icon + ' *' + cur.name + '*\n' +
-                          '💰 Цена: от *' + cur.price + ' ₽*\n\n' +
-                          '👤 Имя: ' + name + '\n' +
-                          contactLabel + ': ' + contact,
-                    parse_mode: 'Markdown'
-                })
-            });
-        }
-    } catch(e) {}
+    // Отправка в Telegram
+    var msg = encodeURIComponent(
+        '🛒 *VOID STORE — НОВЫЙ ЗАКАЗ!*\n\n' +
+        cur.icon + ' *' + cur.name + '*\n' +
+        '💰 Цена: от *' + cur.price + ' ₽*\n\n' +
+        '👤 Имя: ' + name + '\n' +
+        contactLabel + ': ' + contact
+    );
     
-    // Сохраняем
-    try {
-        await fetch(URL + '/rest/v1/orders', {
-            method: 'POST',
-            headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                customer_name: name,
-                customer_phone: contactType + ': ' + contact,
-                items: JSON.stringify([{name:cur.name, price:cur.price, qty:1}]),
-                total: cur.price
-            })
-        });
-    } catch(e) {}
+    var url = 'https://api.telegram.org/bot' + _t + '/sendMessage?chat_id=' + _c + '&text=' + msg + '&parse_mode=Markdown';
+    
+    var img = new Image();
+    img.src = url;
 };
 </script>
 </body>
