@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Магазин</title>
     <style>
-        body { font-family: Arial; background: #f5f5f5; margin: 0; }
+        body { font-family: Arial; background: #f5f5f5; margin: 0; padding: 0; }
         .header { background: #1a1a2e; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; }
         .products { display: flex; flex-wrap: wrap; gap: 10px; padding: 15px; justify-content: center; }
         .card { background: white; border-radius: 12px; padding: 12px; width: 160px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -13,20 +13,14 @@
         .card h3 { font-size: 14px; margin: 6px 0; }
         .card .price { font-size: 16px; font-weight: bold; color: #e94560; margin: 5px 0; }
         .card button { width: 100%; padding: 10px; background: #0f3460; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 350px; }
-        .modal h2 { margin: 0 0 10px 0; font-size: 18px; }
-        .modal input { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; -webkit-appearance: none; }
-        .modal button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .btn-ok { background: #2ed573; color: white; }
-        .btn-no { background: #ff4757; color: white; }
-        .result { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 2000; }
-        .result.active { display: flex; }
-        .result-box { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 85%; max-width: 350px; }
-        .result-box .icon { font-size: 50px; }
-        .result-box p { margin: 10px 0; font-size: 16px; }
-        .result-box button { padding: 12px 30px; background: #0f3460; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 9999; }
+        .popup.show { display: flex !important; }
+        .popup-box { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 350px; text-align: center; }
+        .popup-box input { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .popup-box button { width: 100%; padding: 14px; margin-top: 5px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .green { background: #2ed573; color: white; }
+        .red { background: #ff4757; color: white; }
+        .blue { background: #0f3460; color: white; }
     </style>
 </head>
 <body>
@@ -34,115 +28,99 @@
 <div class="header">🛒 Магазин</div>
 <div class="products" id="products"></div>
 
-<div class="modal" id="orderModal">
-    <div class="modal-content">
-        <h2>Оформление заказа</h2>
-        <p id="orderInfo" style="font-weight:bold;margin:5px 0;"></p>
-        <input type="text" id="customerName" placeholder="Ваше имя">
-        <input type="text" id="customerContact" placeholder="@telegram или VK">
-        <button class="btn-ok" onclick="submitOrder()">✅ Заказать</button>
-        <button class="btn-no" onclick="closeModal()">Отмена</button>
+<!-- Форма заказа -->
+<div class="popup" id="formPopup">
+    <div class="popup-box">
+        <h2 id="formTitle">Оформление</h2>
+        <input type="text" id="custName" placeholder="Ваше имя">
+        <input type="text" id="custContact" placeholder="@telegram или VK">
+        <button class="green" id="submitBtn">✅ Заказать</button>
+        <button class="red" onclick="hideForm()">Отмена</button>
     </div>
 </div>
 
-<div class="result" id="resultModal">
-    <div class="result-box">
-        <div class="icon" id="resultIcon"></div>
-        <p id="resultText"></p>
-        <button onclick="document.getElementById('resultModal').classList.remove('active')">OK</button>
+<!-- Результат -->
+<div class="popup" id="resultPopup">
+    <div class="popup-box">
+        <div style="font-size:50px;" id="resultIcon">✅</div>
+        <p style="font-size:16px;" id="resultText"></p>
+        <button class="blue" onclick="hideResult()">OK</button>
     </div>
 </div>
 
 <script>
-const URL = 'https://fetnrmzltbpgatcgelca.supabase.co';
-const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZldG5ybXpsdGJwZ2F0Y2dlbGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU5NjQsImV4cCI6MjA5NTY1MTk2NH0.l-3iGMBY1mRnpGxNjZN981i360k4fgYsgyEkwBK1jqU';
+var URL = 'https://fetnrmzltbpgatcgelca.supabase.co';
+var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZldG5ybXpsdGJwZ2F0Y2dlbGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU5NjQsImV4cCI6MjA5NTY1MTk2NH0.l-3iGMBY1mRnpGxNjZN981i360k4fgYsgyEkwBK1jqU';
 
-const products = [
+var products = [
     { id:1, name:'iPhone 15', price:89990, image:'https://picsum.photos/300/300?1' },
     { id:2, name:'Samsung S24', price:79990, image:'https://picsum.photos/300/300?2' },
     { id:3, name:'AirPods Pro', price:19990, image:'https://picsum.photos/300/300?3' },
     { id:4, name:'MacBook Air', price:109990, image:'https://picsum.photos/300/300?4' }
 ];
 
-let currentProduct = null;
+var cur = null;
 
-function showResult(ok, text) {
-    document.getElementById('resultIcon').textContent = ok ? '✅' : '❌';
+document.getElementById('products').innerHTML = products.map(function(p) {
+    return '<div class="card"><img src="' + p.image + '"><h3>' + p.name + '</h3><div class="price">' + p.price.toLocaleString() + ' ₽</div><button onclick="buy(' + p.id + ')">Купить</button></div>';
+}).join('');
+
+function buy(id) {
+    cur = products.find(function(p) { return p.id === id; });
+    document.getElementById('formTitle').textContent = cur.name + ' — ' + cur.price.toLocaleString() + ' ₽';
+    document.getElementById('custName').value = '';
+    document.getElementById('custContact').value = '';
+    document.getElementById('formPopup').classList.add('show');
+}
+
+function hideForm() {
+    document.getElementById('formPopup').classList.remove('show');
+}
+
+function showResult(icon, text) {
+    document.getElementById('resultIcon').textContent = icon;
     document.getElementById('resultText').textContent = text;
-    document.getElementById('resultModal').classList.add('active');
+    document.getElementById('resultPopup').classList.add('show');
 }
 
-document.getElementById('products').innerHTML = products.map(p => `
-    <div class="card">
-        <img src="${p.image}" alt="${p.name}">
-        <h3>${p.name}</h3>
-        <div class="price">${p.price.toLocaleString()} ₽</div>
-        <button onclick="openOrder(${p.id})">Купить</button>
-    </div>
-`).join('');
-
-function openOrder(id) {
-    currentProduct = products.find(p => p.id === id);
-    document.getElementById('orderInfo').textContent = currentProduct.name + ' — ' + currentProduct.price.toLocaleString() + ' ₽';
-    document.getElementById('orderModal').classList.add('active');
+function hideResult() {
+    document.getElementById('resultPopup').classList.remove('show');
 }
 
-function closeModal() {
-    document.getElementById('orderModal').classList.remove('active');
-}
-
-async function submitOrder() {
-    const name = document.getElementById('customerName').value.trim();
-    const contact = document.getElementById('customerContact').value.trim();
+document.getElementById('submitBtn').onclick = async function() {
+    var name = document.getElementById('custName').value.trim();
+    var contact = document.getElementById('custContact').value.trim();
     
     if (!name || !contact) {
-        showResult(false, 'Заполни все поля!');
+        showResult('❌', 'Заполни все поля!');
         return;
     }
     
-    closeModal();
+    // Сразу показываем результат
+    hideForm();
+    showResult('✅', 'Заказ оформлен! Я скоро свяжусь с вами.');
     
-    // Сохраняем заказ
+    // Потом в фоне отправляем
     try {
         await fetch(URL + '/rest/v1/orders', {
             method: 'POST',
             headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                customer_name: name,
-                customer_phone: contact,
-                items: JSON.stringify([{name:currentProduct.name, price:currentProduct.price, qty:1}]),
-                total: currentProduct.price
-            })
+            body: JSON.stringify({ customer_name: name, customer_phone: contact, items: JSON.stringify([{name:cur.name, price:cur.price, qty:1}]), total: cur.price })
         });
     } catch(e) {}
     
-    // Отправляем в Telegram
-    let tgOk = false;
     try {
-        const s = await fetch(URL + '/rest/v1/settings?select=*', { headers: {'apikey': KEY} });
-        const settings = await s.json();
-        
-        if (settings.length > 0) {
-            const {bot_token, chat_id} = settings[0];
-            const tgRes = await fetch('https://api.telegram.org/bot' + bot_token + '/sendMessage', {
+        var s = await fetch(URL + '/rest/v1/settings?select=*', { headers: {'apikey': KEY} });
+        var set = await s.json();
+        if (set.length > 0) {
+            await fetch('https://api.telegram.org/bot' + set[0].bot_token + '/sendMessage', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    chat_id: chat_id,
-                    text: '🛒 НОВЫЙ ЗАКАЗ!\n\n👤 ' + name + '\n📱 ' + contact + '\n📦 ' + currentProduct.name + '\n💰 ' + currentProduct.price.toLocaleString() + ' ₽'
-                })
+                body: JSON.stringify({ chat_id: set[0].chat_id, text: '🛒 ЗАКАЗ!\n\n👤 ' + name + '\n📱 ' + contact + '\n📦 ' + cur.name + '\n💰 ' + cur.price.toLocaleString() + ' ₽' })
             });
-            const tgData = await tgRes.json();
-            tgOk = tgData.ok;
         }
     } catch(e) {}
-    
-    if (tgOk) {
-        showResult(true, 'Заказ оформлен! Я скоро свяжусь с вами.');
-    } else {
-        showResult(true, 'Заказ принят! Я свяжусь с вами в ближайшее время.');
-    }
-}
+};
 </script>
 </body>
 </html>
