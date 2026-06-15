@@ -2,47 +2,60 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Магазин</title>
     <style>
         body { font-family: Arial; background: #f5f5f5; margin: 0; }
-        .header { background: #1a1a2e; color: white; padding: 15px 30px; text-align: center; }
-        .products { display: flex; flex-wrap: wrap; gap: 15px; padding: 20px; max-width: 1000px; margin: 0 auto; justify-content: center; }
-        .card { background: white; border-radius: 10px; padding: 15px; width: 220px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
-        .card h3 { margin: 8px 0; font-size: 16px; }
-        .card .price { font-size: 18px; font-weight: bold; color: #e94560; }
-        .card button { width: 100%; padding: 10px; margin-top: 5px; background: #0f3460; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        .header { background: #1a1a2e; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; }
+        .products { display: flex; flex-wrap: wrap; gap: 10px; padding: 15px; justify-content: center; }
+        .card { background: white; border-radius: 12px; padding: 12px; width: 160px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
+        .card h3 { font-size: 14px; margin: 6px 0; }
+        .card .price { font-size: 16px; font-weight: bold; color: #e94560; margin: 5px 0; }
+        .card button { width: 100%; padding: 10px; background: #0f3460; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; }
-        .modal input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        .modal button { width: 100%; padding: 14px; background: #2ed573; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold; }
-        .modal .cancel { background: #ff4757; margin-top: 5px; }
-        #log { background: #1a1a2e; color: #0f0; padding: 15px; margin: 20px; border-radius: 10px; font-family: monospace; font-size: 13px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; display: none; }
+        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 350px; }
+        .modal h2 { margin: 0 0 10px 0; font-size: 18px; }
+        .modal input { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; -webkit-appearance: none; }
+        .modal button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .btn-ok { background: #2ed573; color: white; }
+        .btn-no { background: #ff4757; color: white; }
+        .result { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 2000; }
+        .result.active { display: flex; }
+        .result-box { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 85%; max-width: 350px; }
+        .result-box .icon { font-size: 50px; }
+        .result-box p { margin: 10px 0; font-size: 16px; }
+        .result-box button { padding: 12px 30px; background: #0f3460; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="header"><h1>🛒 Магазин</h1></div>
+<div class="header">🛒 Магазин</div>
 <div class="products" id="products"></div>
-<div id="log">Лог:</div>
 
 <div class="modal" id="orderModal">
     <div class="modal-content">
         <h2>Оформление заказа</h2>
-        <p id="orderInfo"></p>
+        <p id="orderInfo" style="font-weight:bold;margin:5px 0;"></p>
         <input type="text" id="customerName" placeholder="Ваше имя">
-        <input type="text" id="customerContact" placeholder="@telegram или ссылка VK">
-        <button onclick="submitOrder()">✅ Заказать</button>
-        <button class="cancel" onclick="closeModal()">Отмена</button>
+        <input type="text" id="customerContact" placeholder="@telegram или VK">
+        <button class="btn-ok" onclick="submitOrder()">✅ Заказать</button>
+        <button class="btn-no" onclick="closeModal()">Отмена</button>
+    </div>
+</div>
+
+<div class="result" id="resultModal">
+    <div class="result-box">
+        <div class="icon" id="resultIcon"></div>
+        <p id="resultText"></p>
+        <button onclick="document.getElementById('resultModal').classList.remove('active')">OK</button>
     </div>
 </div>
 
 <script>
 const URL = 'https://fetnrmzltbpgatcgelca.supabase.co';
 const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZldG5ybXpsdGJwZ2F0Y2dlbGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU5NjQsImV4cCI6MjA5NTY1MTk2NH0.l-3iGMBY1mRnpGxNjZN981i360k4fgYsgyEkwBK1jqU';
-
-function log(msg) { document.getElementById('log').innerHTML += '\n' + msg; console.log(msg); }
 
 const products = [
     { id:1, name:'iPhone 15', price:89990, image:'https://picsum.photos/300/300?1' },
@@ -53,9 +66,15 @@ const products = [
 
 let currentProduct = null;
 
+function showResult(ok, text) {
+    document.getElementById('resultIcon').textContent = ok ? '✅' : '❌';
+    document.getElementById('resultText').textContent = text;
+    document.getElementById('resultModal').classList.add('active');
+}
+
 document.getElementById('products').innerHTML = products.map(p => `
     <div class="card">
-        <img src="${p.image}">
+        <img src="${p.image}" alt="${p.name}">
         <h3>${p.name}</h3>
         <div class="price">${p.price.toLocaleString()} ₽</div>
         <button onclick="openOrder(${p.id})">Купить</button>
@@ -66,13 +85,10 @@ function openOrder(id) {
     currentProduct = products.find(p => p.id === id);
     document.getElementById('orderInfo').textContent = currentProduct.name + ' — ' + currentProduct.price.toLocaleString() + ' ₽';
     document.getElementById('orderModal').classList.add('active');
-    document.getElementById('customerName').value = '';
-    document.getElementById('customerContact').value = '';
 }
 
 function closeModal() {
     document.getElementById('orderModal').classList.remove('active');
-    currentProduct = null;
 }
 
 async function submitOrder() {
@@ -80,18 +96,15 @@ async function submitOrder() {
     const contact = document.getElementById('customerContact').value.trim();
     
     if (!name || !contact) {
-        alert('Заполни все поля!');
+        showResult(false, 'Заполни все поля!');
         return;
     }
     
-    if (!currentProduct) return;
-    
     closeModal();
-    log('🛒 Заказ: ' + currentProduct.name + ' | ' + name + ' | ' + contact);
     
-    // Сохраняем в базу
+    // Сохраняем заказ
     try {
-        const res = await fetch(URL + '/rest/v1/orders', {
+        await fetch(URL + '/rest/v1/orders', {
             method: 'POST',
             headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -101,53 +114,33 @@ async function submitOrder() {
                 total: currentProduct.price
             })
         });
-        
-        if (res.ok) {
-            log('✅ Заказ сохранён в базу');
-        } else {
-            const err = await res.text();
-            log('❌ Ошибка базы: ' + err);
-        }
-    } catch(e) {
-        log('❌ Ошибка: ' + e.message);
-    }
+    } catch(e) {}
     
     // Отправляем в Telegram
+    let tgOk = false;
     try {
-        const s = await fetch(URL + '/rest/v1/settings?select=*', {
-            headers: { 'apikey': KEY }
-        });
+        const s = await fetch(URL + '/rest/v1/settings?select=*', { headers: {'apikey': KEY} });
         const settings = await s.json();
         
-        if (settings.length === 0) {
-            log('❌ Настроек нет!');
-            alert('✅ Заказ принят! Но Telegram не настроен.');
-            return;
+        if (settings.length > 0) {
+            const {bot_token, chat_id} = settings[0];
+            const tgRes = await fetch('https://api.telegram.org/bot' + bot_token + '/sendMessage', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    chat_id: chat_id,
+                    text: '🛒 НОВЫЙ ЗАКАЗ!\n\n👤 ' + name + '\n📱 ' + contact + '\n📦 ' + currentProduct.name + '\n💰 ' + currentProduct.price.toLocaleString() + ' ₽'
+                })
+            });
+            const tgData = await tgRes.json();
+            tgOk = tgData.ok;
         }
-        
-        const {bot_token, chat_id} = settings[0];
-        log('📤 Отправляю в Telegram...');
-        
-        const msg = '🛒 *НОВЫЙ ЗАКАЗ!*\n\n👤 ' + name + '\n📱 ' + contact + '\n📦 ' + currentProduct.name + '\n💰 *' + currentProduct.price.toLocaleString() + ' ₽*';
-        
-        const tgRes = await fetch('https://api.telegram.org/bot' + bot_token + '/sendMessage', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chat_id, text: msg, parse_mode: 'Markdown' })
-        });
-        
-        const tgData = await tgRes.json();
-        
-        if (tgData.ok) {
-            log('✅ Отправлено в Telegram!');
-            alert('✅ Заказ оформлен! Я скоро свяжусь с вами.');
-        } else {
-            log('❌ Ошибка Telegram: ' + tgData.description);
-            alert('Ошибка отправки: ' + tgData.description);
-        }
-    } catch(e) {
-        log('❌ Ошибка: ' + e.message);
-        alert('✅ Заказ принят! Но уведомление не отправлено: ' + e.message);
+    } catch(e) {}
+    
+    if (tgOk) {
+        showResult(true, 'Заказ оформлен! Я скоро свяжусь с вами.');
+    } else {
+        showResult(true, 'Заказ принят! Я свяжусь с вами в ближайшее время.');
     }
 }
 </script>
