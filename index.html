@@ -80,9 +80,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
         
-        .card:hover::before {
-            opacity: 1;
-        }
+        .card:hover::before { opacity: 1; }
         
         .card .icon {
             font-size: 50px;
@@ -147,9 +145,7 @@
             backdrop-filter: blur(5px);
         }
         
-        .popup.show {
-            display: flex;
-        }
+        .popup.show { display: flex; }
         
         .popup-box {
             background: #1a1a2e;
@@ -187,13 +183,39 @@
             transition: border 0.2s;
         }
         
-        .popup-box input:focus {
-            border-color: #667eea;
+        .popup-box input:focus { border-color: #667eea; }
+        .popup-box input::placeholder { color: rgba(255,255,255,0.4); }
+        
+        .contact-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
         }
         
-        .popup-box input::placeholder {
-            color: rgba(255,255,255,0.4);
+        .contact-tab {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
         }
+        
+        .contact-tab.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.2);
+        }
+        
+        .contact-tab.tg { border-color: #45b7d1; }
+        .contact-tab.tg.active { background: rgba(69, 183, 209, 0.3); }
+        
+        .contact-tab.vk { border-color: #4a76a8; }
+        .contact-tab.vk.active { background: rgba(74, 118, 168, 0.3); }
         
         .popup-box button {
             width: 100%;
@@ -262,11 +284,18 @@
 <!-- Форма заказа -->
 <div class="popup" id="formPopup">
     <div class="popup-box">
-        <div class="icon" id="formIcon" style="font-size:40px;"></div>
+        <div style="font-size:40px;" id="formIcon"></div>
         <h2 id="formTitle"></h2>
         <p id="formPrice" style="color:#667eea;font-weight:700;margin-bottom:15px;"></p>
+        
+        <div class="contact-tabs">
+            <button class="contact-tab tg active" onclick="selectContact('telegram')" id="tabTg">✈️ Telegram</button>
+            <button class="contact-tab vk" onclick="selectContact('vk')" id="tabVk">💙 ВКонтакте</button>
+        </div>
+        
         <input type="text" id="custName" placeholder="👤 Ваше имя">
-        <input type="text" id="custContact" placeholder="@telegram или ссылка VK">
+        <input type="text" id="custContact" placeholder="@username или ссылка">
+        
         <button class="btn-green" id="submitBtn">✅ Оформить заказ</button>
         <button class="btn-red" onclick="hideForm()">Отмена</button>
     </div>
@@ -286,16 +315,30 @@ var URL = 'https://fetnrmzltbpgatcgelca.supabase.co';
 var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZldG5ybXpsdGJwZ2F0Y2dlbGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU5NjQsImV4cCI6MjA5NTY1MTk2NH0.l-3iGMBY1mRnpGxNjZN981i360k4fgYsgyEkwBK1jqU';
 
 var products = [
-    { id:1, name:'2D Логотип', price:230, icon:'🎨', color:'#ff6b6b' },
-    { id:2, name:'Сайт под ключ', price:350, icon:'💻', color:'#667eea' },
-    { id:3, name:'ВК Бот с нуля', price:300, icon:'🤖', color:'#4ecdc4' },
-    { id:4, name:'ТГ Бот с нуля', price:250, icon:'✈️', color:'#45b7d1' },
-    { id:5, name:'3D Логотип', price:260, icon:'💎', color:'#f093fb' },
-    { id:6, name:'2D Обложка', price:250, icon:'🖼️', color:'#ffa502' },
-    { id:7, name:'3D Обложка', price:280, icon:'🌟', color:'#7bed9f' }
+    { id:1, name:'2D Логотип', price:230, icon:'🎨' },
+    { id:2, name:'Сайт под ключ', price:350, icon:'💻' },
+    { id:3, name:'ВК Бот с нуля', price:300, icon:'🤖' },
+    { id:4, name:'ТГ Бот с нуля', price:250, icon:'✈️' },
+    { id:5, name:'3D Логотип', price:260, icon:'💎' },
+    { id:6, name:'2D Обложка', price:250, icon:'🖼️' },
+    { id:7, name:'3D Обложка', price:280, icon:'🌟' }
 ];
 
 var cur = null;
+var contactType = 'telegram';
+
+function selectContact(type) {
+    contactType = type;
+    document.getElementById('tabTg').classList.remove('active');
+    document.getElementById('tabVk').classList.remove('active');
+    if (type === 'telegram') {
+        document.getElementById('tabTg').classList.add('active');
+        document.getElementById('custContact').placeholder = '@username Telegram';
+    } else {
+        document.getElementById('tabVk').classList.add('active');
+        document.getElementById('custContact').placeholder = 'Ссылка на страницу VK';
+    }
+}
 
 document.getElementById('products').innerHTML = products.map(function(p) {
     return '<div class="card">' +
@@ -313,6 +356,7 @@ function buy(id) {
     document.getElementById('formPrice').textContent = 'Цена: от ' + cur.price + ' ₽';
     document.getElementById('custName').value = '';
     document.getElementById('custContact').value = '';
+    selectContact('telegram');
     document.getElementById('formPopup').classList.add('show');
 }
 
@@ -330,8 +374,10 @@ document.getElementById('submitBtn').onclick = async function() {
     
     if (!name || !contact) { showResult('❌', 'Заполни все поля!'); return; }
     
+    var contactLabel = contactType === 'telegram' ? '✈️ Telegram' : '💙 ВКонтакте';
+    
     hideForm();
-    showResult('✅', 'Заказ оформлен!\nЯ скоро свяжусь с вами\nдля уточнения деталей.');
+    showResult('✅', 'Заказ оформлен!\nЯ напишу вам в ' + (contactType === 'telegram' ? 'Telegram' : 'ВКонтакте') + '\nдля уточнения деталей.');
     
     // Telegram
     try {
@@ -347,7 +393,7 @@ document.getElementById('submitBtn').onclick = async function() {
                           cur.icon + ' *' + cur.name + '*\n' +
                           '💰 Цена: от *' + cur.price + ' ₽*\n\n' +
                           '👤 Имя: ' + name + '\n' +
-                          '📱 Контакт: ' + contact,
+                          contactLabel + ': ' + contact,
                     parse_mode: 'Markdown'
                 })
             });
@@ -361,7 +407,7 @@ document.getElementById('submitBtn').onclick = async function() {
             headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 customer_name: name,
-                customer_phone: contact,
+                customer_phone: contactType + ': ' + contact,
                 items: JSON.stringify([{name:cur.name, price:cur.price, qty:1}]),
                 total: cur.price
             })
