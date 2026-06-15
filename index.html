@@ -50,10 +50,6 @@
 var URL = 'https://fetnrmzltbpgatcgelca.supabase.co';
 var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZldG5ybXpsdGJwZ2F0Y2dlbGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU5NjQsImV4cCI6MjA5NTY1MTk2NH0.l-3iGMBY1mRnpGxNjZN981i360k4fgYsgyEkwBK1jqU';
 
-// ТВОИ ДАННЫЕ ПРЯМО ЗДЕСЬ
-var BOT_TOKEN = '8696921506:AAE883xmJpF0a-SvSFTZw6L5MI4to4gIAgc';
-var CHAT_ID = '8549857532';
-
 var products = [
     { id:1, name:'iPhone 15', price:89990, image:'https://picsum.photos/300/300?1' },
     { id:2, name:'Samsung S24', price:79990, image:'https://picsum.photos/300/300?2' },
@@ -92,19 +88,24 @@ document.getElementById('submitBtn').onclick = async function() {
     hideForm();
     showResult('✅', 'Заказ оформлен! Я скоро свяжусь с вами.');
     
-    // Отправка в Telegram
+    // Берём токен из базы
     try {
-        await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                text: '🛒 НОВЫЙ ЗАКАЗ!\n\n👤 ' + name + '\n📱 ' + contact + '\n📦 ' + cur.name + '\n💰 ' + cur.price.toLocaleString() + ' ₽'
-            })
-        });
+        var s = await fetch(URL + '/rest/v1/settings?select=*', { headers: {'apikey': KEY} });
+        var set = await s.json();
+        
+        if (set.length > 0) {
+            await fetch('https://api.telegram.org/bot' + set[0].bot_token + '/sendMessage', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    chat_id: set[0].chat_id,
+                    text: '🛒 ЗАКАЗ!\n\n👤 ' + name + '\n📱 ' + contact + '\n📦 ' + cur.name + '\n💰 ' + cur.price.toLocaleString() + ' ₽'
+                })
+            });
+        }
     } catch(e) {}
     
-    // Сохранение в базу
+    // Сохраняем в базу
     try {
         await fetch(URL + '/rest/v1/orders', {
             method: 'POST',
