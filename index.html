@@ -251,7 +251,6 @@
 </div>
 
 <script>
-// Зашифрованные данные
 var _t = atob('ODk4MjA5MzYwODpBQUVqVlhaeDlUR3dSRUp4YmRKZU5FTnRpeWJpekFWSWZBNA==');
 var _c = '8549857532';
 
@@ -320,7 +319,6 @@ document.getElementById('submitBtn').onclick = function() {
     hideForm();
     showResult('✅', 'Заказ оформлен!\nЯ напишу вам в ' + (contactType === 'telegram' ? 'Telegram' : 'ВКонтакте') + '\nдля уточнения деталей.');
     
-    // Отправка в Telegram
     var msg = encodeURIComponent(
         '🛒 *VOID STORE — НОВЫЙ ЗАКАЗ!*\n\n' +
         cur.icon + ' *' + cur.name + '*\n' +
@@ -331,8 +329,7 @@ document.getElementById('submitBtn').onclick = function() {
     
     var url = 'https://api.telegram.org/bot' + _t + '/sendMessage?chat_id=' + _c + '&text=' + msg + '&parse_mode=Markdown';
     
-    var img = new Image();
-    img.src = url;
+    fetch(url).then(function() {}).catch(function() {});
 };
 </script>
 </body>
